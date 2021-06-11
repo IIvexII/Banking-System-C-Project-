@@ -10,7 +10,7 @@ This Banking System has the ability to handle the two account types such as:
 
 These accounts have the features of:
 
-* Withdrawl
+* Withdrawal
 * Deposit
 * Cradit Card
 * Check books
