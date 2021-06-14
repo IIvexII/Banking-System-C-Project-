@@ -4,13 +4,7 @@
 int main(){
   CustomerManagement customer;
 
-  // customer.newRegistration();
-
-  if(customer.login()){
-    cout << "Sucessful" << endl;
-  }
-  else{
-    cout << "Failed." << endl;
-  }
+  customer.newRegistration();
+  customer.listAllAccounts();
   return 0;
 }
