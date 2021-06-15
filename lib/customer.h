@@ -36,12 +36,15 @@ class CustomerManagement{
     void newRegistration();
     bool login();
     bool accountNumChecker(int);
-    int accountNumGenerator(int, int);
+    int accountNumGenerator();
+    bool cardNumChecker(int);
+    int cardNumGenerator();
     void listAllAccounts();
     void deposit();
     void withdrow(WithdrawTypes);
     void removeCustomer();
     void updateInfo();
+    void getInfo(int);
 };
 /***********************
         deposit()
@@ -225,6 +228,8 @@ void CustomerManagement::menuHandler(){
 void CustomerManagement::newRegistration(){
   int ct, at;
 
+  cin.clear();
+  cin.ignore(124, '\n');
   cout << "Enter Name: "; cin.getline(customer.name,20);
   cout << "Enter CNIC: "; cin.getline(customer.cnic,16);
   cout << "Enter Address: "; cin.getline(customer.address,100);
@@ -233,9 +238,13 @@ void CustomerManagement::newRegistration(){
   cout << "1. Master Card"<< endl;
   cout << "2. Visa Card"<< endl;
   cout << "3. Local Card"<< endl;
+  cin.clear();
+  cin.ignore(124, '\n');
   cout << "Enter Credit Card Type: "; cin >> ct;
   cout << "1. Current Account"<< endl;
   cout << "2. Saving Account"<< endl;
+  cin.clear();
+  cin.ignore(124, '\n');
   cout << "Enter Account Type: "; cin >> at;
 
   switch(ct){
@@ -253,11 +262,11 @@ void CustomerManagement::newRegistration(){
       break;
   }
 
-  customer.cardNumber = accountNumGenerator(698523654,111111111);
+  customer.cardNumber = cardNumGenerator();
   Sleep(10);
   customer.accountType = static_cast<AccountTypes>(at);
 
-  customer.accountNumber = accountNumGenerator(789541541,111111111);
+  customer.accountNumber = accountNumGenerator();
 
   // Output to the file
   ofstream outFile(FILENAME, ios::app);
@@ -320,16 +329,53 @@ bool CustomerManagement::accountNumChecker(int accountNum){
 /************************
   accountNumGenerator()
 *************************/
-int CustomerManagement::accountNumGenerator(int high, int low){
+int CustomerManagement::accountNumGenerator(){
   int accountNum;
 
-  srand (time(NULL));
+  srand (time(0));
 
   while(accountNumChecker(accountNum)){
-    accountNum = rand() % high + low;
+    accountNum = 111111111 + rand() % (( 999999999 + 1 ) - 111111111);
   }
 
+
   return accountNum;
+}
+/*********************
+  cardNumChecker()
+**********************/
+bool CustomerManagement::cardNumChecker(int cardNum){
+  Customer tmpCustomer;
+  ifstream inFile(FILENAME, ios::in);
+
+  if(inFile.is_open()){
+    while(!inFile.eof()){
+      inFile.read((char*)&tmpCustomer, sizeof(Customer));
+
+      if(cardNum==tmpCustomer.cardNumber){
+        inFile.close();
+        return 1;
+      }
+    }
+    inFile.close();
+  }
+  return 0;
+}
+
+/************************
+    cardNumGenerator()
+*************************/
+int CustomerManagement::cardNumGenerator(){
+  int cardNum;
+
+  srand (time(0));
+
+  while(cardNumChecker(cardNum)){
+    cardNum = 111111111 + rand() % (( 999999999 + 1 ) - 111111111);
+  }
+
+
+  return cardNum;
 }
 /*************************
         output()
@@ -401,6 +447,9 @@ void CustomerManagement::removeCustomer(){
 **************************/
 void CustomerManagement::updateInfo(){
   int an,pos, at;
+
+  cin.clear();
+  cin.ignore(124, '\n');
   cout << "Enter Account Number: "; cin >> an;
 
   fstream file(FILENAME, ios::in | ios::out | ios::binary);
@@ -411,7 +460,7 @@ void CustomerManagement::updateInfo(){
     file.read((char*)&customer, sizeof(Customer));
 
     if(customer.accountNumber == an){
-      int choice;
+      char choice;
 
       cout << "1. Name" << endl;
       cout << "2. Address" << endl;
@@ -420,22 +469,22 @@ void CustomerManagement::updateInfo(){
       cout << "0. Back" << endl;
       cout << "Choose: "; cin >> choice; 
       switch(choice){
-        case 1:
+        case '1':
           cin.clear();
           cin.ignore(124, '\n');
           cout << "Enter Name: "; cin.getline(customer.name, 20);
           break;
-        case 2:
+        case '2':
           cin.clear();
           cin.ignore(124, '\n');
           cout << "Enter Address: "; cin.getline(customer.address, 100);
           break;
-        case 3:
+        case '3':
           cin.clear();
           cin.ignore(124, '\n');
           cout << "Enter Telephone: "; cin.getline(customer.telephoneNumber, 14);
           break;
-        case 4:
+        case '4':
           cout << "1. Current Account: " << endl;
           cout << "2. Saving Account: " << endl;
           cin.clear();
@@ -448,7 +497,28 @@ void CustomerManagement::updateInfo(){
       file.seekp(pos);
 
       file.write((char*)&customer, sizeof(Customer));
+      
+      file.close();
+
+      break;
     }
   }
   file.close();
+}
+/*************************
+        getInfo()
+**************************/
+void CustomerManagement::getInfo(int accountNum){
+  ifstream inFile(FILENAME);
+
+  while(!inFile.eof()){
+    inFile.read((char*)&customer, sizeof(Customer));
+
+    if(customer.accountNumber == accountNum){
+      output(customer);
+
+      inFile.close();
+      return;
+    }
+  }
 }
