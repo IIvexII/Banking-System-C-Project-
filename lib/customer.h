@@ -40,7 +40,6 @@ class CustomerManagement{
     void listAllAccounts();
     void deposit();
     void withdrow(WithdrawTypes);
-    // To be made
     void removeCustomer();
     void updateInfo();
 };
@@ -396,4 +395,60 @@ void CustomerManagement::removeCustomer(){
 
   remove(FILENAME);
   rename(TMPFILENAME, FILENAME);
+}
+/*************************
+        updateInfo()
+**************************/
+void CustomerManagement::updateInfo(){
+  int an,pos, at;
+  cout << "Enter Account Number: "; cin >> an;
+
+  fstream file(FILENAME, ios::in | ios::out | ios::binary);
+
+  while(!file.eof()){
+
+    pos = file.tellg();
+    file.read((char*)&customer, sizeof(Customer));
+
+    if(customer.accountNumber == an){
+      int choice;
+
+      cout << "1. Name" << endl;
+      cout << "2. Address" << endl;
+      cout << "3. Telephone Number" << endl;
+      cout << "4. Account Type" << endl;
+      cout << "0. Back" << endl;
+      cout << "Choose: "; cin >> choice; 
+      switch(choice){
+        case 1:
+          cin.clear();
+          cin.ignore(124, '\n');
+          cout << "Enter Name: "; cin.getline(customer.name, 20);
+          break;
+        case 2:
+          cin.clear();
+          cin.ignore(124, '\n');
+          cout << "Enter Address: "; cin.getline(customer.address, 100);
+          break;
+        case 3:
+          cin.clear();
+          cin.ignore(124, '\n');
+          cout << "Enter Telephone: "; cin.getline(customer.telephoneNumber, 14);
+          break;
+        case 4:
+          cout << "1. Current Account: " << endl;
+          cout << "2. Saving Account: " << endl;
+          cin.clear();
+          cin.ignore(124, '\n');
+          cout << "Enter Account Type: "; cin >> at;
+          customer.accountType = static_cast<AccountTypes>(at);
+          break;
+      }
+
+      file.seekp(pos);
+
+      file.write((char*)&customer, sizeof(Customer));
+    }
+  }
+  file.close();
 }

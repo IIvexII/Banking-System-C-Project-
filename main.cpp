@@ -9,7 +9,8 @@ int main(){
   customer.listAllAccounts();
   // customer.deposit();
   // customer.withdrow(CreditCard);
-  customer.removeCustomer();
+  // customer.removeCustomer();
+  customer.updateInfo();
 
   return 0;
 }
