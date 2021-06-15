@@ -1,9 +1,12 @@
 #include "header.h"
+#include "customer.h"
+#include "employee.h"
 
 class Bank{
   private:
     char choice;
-
+    EmployeeManagement employee;
+    CustomerManagement customer;
   public: 
     void menu();
     void menuHandler();
@@ -13,6 +16,7 @@ class Bank{
       menu()
 ******************/
 void Bank::menu(){
+  system("cls");
   cout << "1. Login as Bank Employee." << endl;
   cout << "2. Login as Bank Customer." << endl;
   cout << "0. Exit" << endl;
@@ -30,11 +34,15 @@ void Bank::menuHandler(){
   switch(choice){
     case '1':
       if(employee.login()){
-        cout << "Sucessfully Logged in as employee." << endl;
+        employee.menuHandler();
       }
+      menuHandler();
+      break;
     case '2':
       if(customer.login()){
-        cout << "Sucessfully Logged in as Customer." << endl;
+        customer.menuHandler();
       }
+      menuHandler();
+      break;
   }
 }

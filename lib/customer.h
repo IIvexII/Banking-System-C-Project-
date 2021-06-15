@@ -1,4 +1,5 @@
 #include "header.h"
+#include "transection.h"
 
 #pragma once
 
@@ -22,10 +23,12 @@ class Customer{
     int cardNumber;
     int limit;
     int intrestRate;
+    char password[20];
 };
 class CustomerManagement{
   private:
     Customer customer, customerSession;
+    TransectionManagement transection;
     double tax=0.025;
     char choice;
 
@@ -41,7 +44,7 @@ class CustomerManagement{
     int cardNumGenerator();
     void listAllAccounts();
     void deposit();
-    void withdrow(WithdrawTypes);
+    void withdraw(WithdrawTypes);
     void removeCustomer();
     void updateInfo();
     void getInfo(int);
@@ -51,6 +54,7 @@ class CustomerManagement{
 ************************/
 void CustomerManagement::deposit(){
   int money, an, pos;
+  char state[10];
   cout << "Enter Account Number: "; cin >> an;
   cout << "Enter Money: "; cin >> money;
 
@@ -67,6 +71,10 @@ void CustomerManagement::deposit(){
         file.seekp(pos);
 
         file.write((char*)&customer, sizeof(Customer));
+        TransectionManagement transection;
+
+        strcpy(state, "deposited");
+        transection.write(customer.accountNumber, money, state);
       }
     }
     file.close();
@@ -75,9 +83,11 @@ void CustomerManagement::deposit(){
 /**********************
       withdrow()
 ***********************/
-void CustomerManagement::withdrow(WithdrawTypes wt){
+void CustomerManagement::withdraw(WithdrawTypes wt ){
   int amount, pos, an;
   int ccn;
+  TransectionManagement transection;
+  char state[10];
   char cnic[16];
 
   switch(wt){
@@ -103,9 +113,12 @@ void CustomerManagement::withdrow(WithdrawTypes wt){
               if(amount<=customer.balance && amount<=customer.limit){
 
                 customer.balance -= amount + tax*amount + (customer.intrestRate/100)*amount;
+                customerSession.balance = customer.balance;
                 file1.seekp(pos);
 
                 file1.write((char*)&customer, sizeof(Customer));
+                strcpy(state, "withdraw");
+                transection.write(customer.accountNumber, amount, state);
 
                 flag = 2;
                 break;
@@ -160,10 +173,14 @@ void CustomerManagement::withdrow(WithdrawTypes wt){
             if(customer.accountNumber==an && strcmp(customer.cnic, cnic)){
               if(amount<=customer.balance){
                 customer.balance -= amount+tax*amount;
+                customerSession.balance = customer.balance;
+
                 file1.seekp(pos);
 
                 file1.write((char*)&customer, sizeof(Customer));
 
+                strcpy(state, "withdraw");
+                transection.write(customer.accountNumber, amount, state);
                 flag = 2;
               }
               else if(amount > customer.limit){
@@ -202,9 +219,10 @@ void CustomerManagement::withdrow(WithdrawTypes wt){
         menu()
 ************************/
 void CustomerManagement::menu(){
+  system("cls");
   cout << "1. Mini Statement" << endl;
-  cout << "2. Withdrow Money Via Credit Card" << endl;
-  cout << "3. Withdrow Money Via Check Book" << endl;
+  cout << "2. Withdraw Money Via Credit Card" << endl;
+  cout << "3. Withdraw Money Via Check Book" << endl;
   cout << "4. Balance Inquiry" << endl;
   cout << "5. Transection History" << endl;
   cout << "0. Logout" << endl;
@@ -219,7 +237,31 @@ void CustomerManagement::menu(){
 void CustomerManagement::menuHandler(){
   menu();
   switch(choice){
-
+    case '1':
+      transection.getTrans(customerSession.accountNumber);
+      getch();
+      menuHandler();
+      break;
+    case '2':
+      withdraw(CreditCard);
+      getch();
+      menuHandler();
+      break;
+    case '3':
+      withdraw(CheckBook);
+      getch();
+      menuHandler();
+      break;
+    case '4':
+      cout << "Your Balance is Rs. " << customerSession.balance << endl;
+      getch();
+      menuHandler();
+      break;
+    case '5':
+      transection.getTrans(customerSession.accountNumber);
+      getch();
+      menuHandler();
+      break;
   }
 }
 /**********************
@@ -246,7 +288,10 @@ void CustomerManagement::newRegistration(){
   cin.clear();
   cin.ignore(124, '\n');
   cout << "Enter Account Type: "; cin >> at;
-
+  cin.clear();
+  cin.ignore(124, '\n');
+  cout << "Enter Password: "; cin.getline(customer.password, 20);
+  
   switch(ct){
     case MasterCard:
       customer.intrestRate = 18;
@@ -268,6 +313,8 @@ void CustomerManagement::newRegistration(){
 
   customer.accountNumber = accountNumGenerator();
 
+  customer.balance = 0;
+
   // Output to the file
   ofstream outFile(FILENAME, ios::app);
 
@@ -283,8 +330,12 @@ void CustomerManagement::newRegistration(){
         login()
 **********************/
 bool CustomerManagement::login(){
-  cout << "Enter Name: "; cin.getline(customer.name,50);
-  cout << "Enter CNIC: "; cin.getline(customer.cnic,16);
+  cin.clear();
+  cin.ignore(124, '\n');
+  cout << "Account Number: "; cin >> customer.accountNumber;
+  cin.clear();
+  cin.ignore(124, '\n');
+  cout << "Password: "; cin.getline(customer.password,16);
 
   ifstream inFile(FILENAME, ios::in);
 
@@ -294,8 +345,8 @@ bool CustomerManagement::login(){
 
       // Compare the user's entered information with
       // the information in the file.
-      if(!strcmp(customerSession.name, customer.name)){
-        if(!strcmp(customerSession.cnic, customer.cnic)){
+      if(customerSession.accountNumber==customer.accountNumber){
+        if(!strcmp(customerSession.password, customer.password)){
           inFile.close(); // close file
           return 1; // if sucessfully logged in.
         }

@@ -2,7 +2,7 @@
 #include <cstring>
 #include <fstream>
 #include <conio.h>
-#include <time.h>
+#include <ctime>
 #include <stdlib.h>
 #include <iomanip>
 #include <Windows.h>

@@ -9,6 +9,7 @@ class Employee{
     char name[20];
     int empId;
     EmployeeType employeeType=Simple;
+
 };
 class EmployeeManagement{
   private:
@@ -19,7 +20,11 @@ class EmployeeManagement{
   public:
     void menu();
     void menuHandler();
+    bool login();
 };
+/***********************
+        menu()
+***********************/
 void EmployeeManagement::menu(){
   system("cls");
   cout << "1. New Account" << endl;
@@ -37,7 +42,9 @@ void EmployeeManagement::menu(){
   }
   while(choice!='1' && choice!='2' && choice!='3' && choice!='4' && choice!='5' && choice!='6' && choice!='7' && choice!='0');
 } 
-
+/***********************
+      menuHandler()
+***********************/
 void EmployeeManagement::menuHandler(){
   menu();
   switch(choice){
@@ -79,10 +86,10 @@ void EmployeeManagement::menuHandler(){
       while(choice!='1' && choice!='2');
       switch(choice){
         case '1':
-          customer.withdrow(CheckBook);
+          customer.withdraw(CheckBook);
           break;
         case '2':
-          customer.withdrow(CreditCard);
+          customer.withdraw(CreditCard);
           break;
       }
       getch();
@@ -96,4 +103,22 @@ void EmployeeManagement::menuHandler(){
     case '0':
       break;
   }
+}
+/**********************
+        login()
+***********************/
+bool EmployeeManagement::login(){
+  char name[20];
+  char password[20];
+
+  cin.clear();
+  cin.ignore(124, '\n');
+
+  cout << "Name: ";cin.getline(name,20) ;
+  cout << "Password: "; cin.getline(password, 20);
+
+  if(!strcmp(name,"employee") && !strcmp(password, "bank123")){
+    return 1;
+  }
+  return 0;
 }
