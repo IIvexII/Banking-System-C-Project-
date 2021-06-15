@@ -4,6 +4,10 @@
 
 #define FILENAME "resources/customer.dat"
 
+enum AccountTypes {CurrentAccount=1, SavingAccount=2};
+enum CredtCardType {MasterCard=1, VisaCard=2, LocalCard=3};
+enum WithdrawTypes {CheckBook, CreditCard};
+
 class Customer{
   public:
     char name[20];
@@ -12,30 +16,249 @@ class Customer{
     char telephoneNumber[14];
     char dateOfBirht[15];
     int accountNumber;
+    int balance=0;
+    AccountTypes accountType;
+    CredtCardType credtCardType;
+    int cardNumber;
+    int limit;
+    int intrestRate;
 };
 class CustomerManagement{
   private:
-    Customer customer;
+    Customer customer, customerSession;
+    double tax=0.025;
+    char choice;
 
     void output(Customer);
   public:
+    void menu();
+    void menuHandler();
     void newRegistration();
     bool login();
     bool accountNumChecker(int);
-    int accountNumGenerator();
+    int accountNumGenerator(int, int);
     void listAllAccounts();
+    void deposit();
+    void withdrow(WithdrawTypes);
+    // To be made
+    void removeCustomer();
+    void updateInfo();
 };
+/***********************
+        deposit()
+************************/
+void CustomerManagement::deposit(){
+  int money, an, pos;
+  cout << "Enter Account Number: "; cin >> an;
+  cout << "Enter Money: "; cin >> money;
+
+  fstream file(FILENAME, ios::in | ios::out | ios::binary);
+
+  if(file.is_open()){
+    file.seekp(0);
+
+    while(!file.eof()){
+      pos = file.tellg();
+      file.read((char*)&customer, sizeof(Customer));
+      if(customer.accountNumber==an){
+        customer.balance += money;
+        file.seekp(pos);
+
+        file.write((char*)&customer, sizeof(Customer));
+      }
+    }
+    file.close();
+  }
+}
+/**********************
+      withdrow()
+***********************/
+void CustomerManagement::withdrow(WithdrawTypes wt){
+  int amount, pos, an;
+  int ccn;
+  char cnic[16];
+
+  switch(wt){
+    case CreditCard:
+      {
+        int flag;
+
+        cout << "Enter Credit Card Number: "; cin >> ccn;
+
+        cin.clear();
+        cin.ignore(124,'\n');
+        cout << "Enter Ammount: "; cin >> amount;
+
+        fstream file1(FILENAME, ios::in | ios::out | ios::binary);
+
+        if(file1.is_open()){
+          file1.seekp(0);
+
+          while(!file1.eof()){
+            pos = file1.tellg();
+            file1.read((char*)&customer, sizeof(Customer));
+            if(customer.cardNumber==ccn){
+              if(amount<=customer.balance && amount<=customer.limit){
+
+                customer.balance -= amount + tax*amount + (customer.intrestRate/100)*amount;
+                file1.seekp(pos);
+
+                file1.write((char*)&customer, sizeof(Customer));
+
+                flag = 2;
+                break;
+              }
+              else if(amount > customer.limit){
+                flag = 3;
+              }
+              else if(amount > customer.balance){
+                flag = 1;
+              }
+              else{
+                flag = 0;
+              }
+            }
+          }
+          switch(flag){
+            case 0:
+              cout << "Operation Failed." << endl;
+              break;
+            case 1:
+              cout << "Insufficient Balance." << endl;
+              break;
+            case 2:
+              cout << "Operation Sucessful." << endl;
+              break;
+            case 3:
+              cout << "Limit Exceed." << endl;
+              break;
+          }
+          file1.close();
+        }
+      }
+        break;
+    case CheckBook:
+      {
+        int flag;
+
+        cout << "Enter Account Number: "; cin >> an;
+        cout << "Enter CNIC: "; cin.getline(cnic, 16);
+        cin.clear();
+        cin.ignore(124,'\n');
+        cout << "Enter Amount: "; cin >> amount;
+
+        fstream file1(FILENAME, ios::in | ios::out | ios::binary);
+
+        if(file1.is_open()){
+          file1.seekp(0);
+
+          while(!file1.eof()){
+            pos = file1.tellg();
+            file1.read((char*)&customer, sizeof(Customer));
+            if(customer.accountNumber==an && strcmp(customer.cnic, cnic)){
+              if(amount<=customer.balance){
+                customer.balance -= amount+tax*amount;
+                file1.seekp(pos);
+
+                file1.write((char*)&customer, sizeof(Customer));
+
+                flag = 2;
+              }
+              else if(amount > customer.limit){
+                flag = 3;
+              }
+              else if(amount > customer.balance){
+                flag = 1;
+              }
+              else{
+                flag = 0;
+              }
+            }
+          }
+          switch(flag){
+            case 0:
+              cout << "Operation Failed." << endl;
+              break;
+            case 1:
+              cout << "Insufficient Balance." << endl;
+              break;
+            case 2:
+              cout << "Operation Sucessful." << endl;
+              break;
+            case 3:
+              cout << "Limit Exceed." << endl;
+              break;
+          }
+          file1.close();
+        }
+      }
+      break;
+  }
+  
+}
+/***********************
+        menu()
+************************/
+void CustomerManagement::menu(){
+  cout << "1. Mini Statement" << endl;
+  cout << "2. Withdrow Money Via Credit Card" << endl;
+  cout << "3. Withdrow Money Via Check Book" << endl;
+  cout << "4. Balance Inquiry" << endl;
+  cout << "5. Transection History" << endl;
+  cout << "0. Logout" << endl;
+
+  do{
+    choice = getch();
+  }while(choice!='1' && choice!='2' && choice!='3' && choice!='4' && choice!='5' && choice!='0' );
+}
+/**********************
+      menuHandler()
+***********************/
+void CustomerManagement::menuHandler(){
+  menu();
+  switch(choice){
+
+  }
+}
 /**********************
     newRegistration()
 ***********************/
 void CustomerManagement::newRegistration(){
+  int ct, at;
+
   cout << "Enter Name: "; cin.getline(customer.name,20);
   cout << "Enter CNIC: "; cin.getline(customer.cnic,16);
   cout << "Enter Address: "; cin.getline(customer.address,100);
   cout << "Enter Telephone: "; cin.getline(customer.telephoneNumber,14);
   cout << "Enter Date Of Birth: "; cin.getline(customer.dateOfBirht,15);
+  cout << "1. Master Card"<< endl;
+  cout << "2. Visa Card"<< endl;
+  cout << "3. Local Card"<< endl;
+  cout << "Enter Credit Card Type: "; cin >> ct;
+  cout << "1. Current Account"<< endl;
+  cout << "2. Saving Account"<< endl;
+  cout << "Enter Account Type: "; cin >> at;
 
-  customer.accountNumber = accountNumGenerator();
+  switch(ct){
+    case MasterCard:
+      customer.intrestRate = 18;
+      customer.limit = 50000;
+      break;
+    case VisaCard:
+      customer.intrestRate = 10;
+      customer.limit = 100000; 
+      break;
+    case 3:
+      customer.intrestRate = 25;
+      customer.limit = 10000;
+      break;
+  }
+
+  customer.cardNumber = accountNumGenerator(698523654,111111111);
+  Sleep(10);
+  customer.accountType = static_cast<AccountTypes>(at);
+
+  customer.accountNumber = accountNumGenerator(789541541,111111111);
 
   // Output to the file
   ofstream outFile(FILENAME, ios::app);
@@ -52,7 +275,6 @@ void CustomerManagement::newRegistration(){
         login()
 **********************/
 bool CustomerManagement::login(){
-  Customer tmpCustomer;
   cout << "Enter Name: "; cin.getline(customer.name,50);
   cout << "Enter CNIC: "; cin.getline(customer.cnic,16);
 
@@ -60,12 +282,12 @@ bool CustomerManagement::login(){
 
   if(inFile.is_open()){
     while(!inFile.eof()){
-      inFile.read((char*)&tmpCustomer, sizeof(Customer));
+      inFile.read((char*)&customerSession, sizeof(Customer));
 
       // Compare the user's entered information with
       // the information in the file.
-      if(!strcmp(tmpCustomer.name, customer.name)){
-        if(!strcmp(tmpCustomer.cnic, customer.cnic)){
+      if(!strcmp(customerSession.name, customer.name)){
+        if(!strcmp(customerSession.cnic, customer.cnic)){
           inFile.close(); // close file
           return 1; // if sucessfully logged in.
         }
@@ -99,13 +321,13 @@ bool CustomerManagement::accountNumChecker(int accountNum){
 /************************
   accountNumGenerator()
 *************************/
-int CustomerManagement::accountNumGenerator(){
+int CustomerManagement::accountNumGenerator(int high, int low){
   int accountNum;
 
   srand (time(NULL));
 
   while(accountNumChecker(accountNum)){
-    accountNum = rand() % 999999999 + 485611111;
+    accountNum = rand() % high + low;
   }
 
   return accountNum;
@@ -118,7 +340,21 @@ void CustomerManagement::output(Customer c){
        << setw(10) << right << c.accountNumber
        << setw(20) << c.cnic
        << setw(16) << c.telephoneNumber
-       << setw(15) << c.dateOfBirht << endl; 
+       << setw(15) << c.dateOfBirht; 
+  // if(c.credtCardType==MasterCard){
+  //   cout << setw(13) << "Master Card";
+  // }else if(c.credtCardType==VisaCard){
+  //   cout << setw(13) << "Visa Card";
+  // }else if(c.credtCardType==LocalCard){
+  //   cout << setw(13) << "Local Card";
+  // }
+  // if(c.accountType == CurrentAccount){
+  //   cout << setw(16) << "Current Account";
+  // }else if(c.accountType == SavingAccount){
+  //   cout << setw(16) << "Saving Account";
+  // }
+  cout << setw(20)<< c.cardNumber;
+  cout << setw(20) << c.balance << endl;
 }
 /************************
       listAllAccount()
@@ -133,4 +369,31 @@ void CustomerManagement::listAllAccounts(){
     }
     inFile.close();
   }
+}
+/*************************
+      removeCustomer()
+**************************/
+void CustomerManagement::removeCustomer(){
+  int an;
+  char TMPFILENAME[] = "resources/tmp.dat";
+
+  cout << "Enter Account Number: "; cin >> an;
+
+  ifstream inFile(FILENAME);
+  ofstream outFile(TMPFILENAME);
+
+  while(inFile.read((char*)&customer, sizeof(Customer))){
+
+    if(customer.accountNumber==an){
+      cout << "Deleted Sucessfully!" << endl;
+    }
+    else{
+      outFile.write((char*)&customer, sizeof(Customer));
+    }
+  }
+  inFile.close();
+  outFile.close();
+
+  remove(FILENAME);
+  rename(TMPFILENAME, FILENAME);
 }

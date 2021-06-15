@@ -5,6 +5,7 @@
 #include <time.h>
 #include <stdlib.h>
 #include <iomanip>
+#include <Windows.h>
 
 #pragma once
 
