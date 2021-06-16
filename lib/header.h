@@ -6,7 +6,8 @@
 #include <stdlib.h>
 #include <iomanip>
 #include <Windows.h>
-
 #pragma once
 
 using namespace std;
+
+#include "customInput.h"

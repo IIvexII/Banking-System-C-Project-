@@ -8,15 +8,25 @@ class Bank{
     EmployeeManagement employee;
     CustomerManagement customer;
   public: 
+    void banner();
     void menu();
     void menuHandler();
 };
+/*****************
+      banner()
+******************/
+void Bank::banner(){
+  system("cls");
+  cout << "***************************" << endl;
+  cout << "          Zack Bank" << endl;
+  cout << "***************************" << endl;
+}
 
 /******************
       menu()
 ******************/
 void Bank::menu(){
-  system("cls");
+  banner();
   cout << "1. Login as Bank Employee." << endl;
   cout << "2. Login as Bank Customer." << endl;
   cout << "0. Exit" << endl;

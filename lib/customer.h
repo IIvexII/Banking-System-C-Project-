@@ -34,6 +34,7 @@ class CustomerManagement{
 
     void output(Customer);
   public:
+    void banner();
     void menu();
     void menuHandler();
     void newRegistration();
@@ -75,6 +76,7 @@ void CustomerManagement::deposit(){
 
         strcpy(state, "deposited");
         transection.write(customer.accountNumber, money, state);
+        break;
       }
     }
     file.close();
@@ -216,10 +218,22 @@ void CustomerManagement::withdraw(WithdrawTypes wt ){
   
 }
 /***********************
+        banner()
+************************/
+void CustomerManagement::banner(){
+  system("cls");
+  
+  cout << "*******************************************************" << endl;
+  cout << " Name: " << customerSession.name << "\t\tBalance: Rs. " << customerSession.balance << endl;
+  cout << " Account Number: " << customerSession.accountNumber << "\tCredit Card:" << customerSession.cardNumber << endl;
+  cout << "*******************************************************" << endl;
+}
+
+/***********************
         menu()
 ************************/
 void CustomerManagement::menu(){
-  system("cls");
+  banner();
   cout << "1. Mini Statement" << endl;
   cout << "2. Withdraw Money Via Credit Card" << endl;
   cout << "3. Withdraw Money Via Check Book" << endl;
@@ -258,7 +272,7 @@ void CustomerManagement::menuHandler(){
       menuHandler();
       break;
     case '5':
-      transection.getTrans(customerSession.accountNumber);
+      transection.getTrans(customerSession.accountNumber, -1);
       getch();
       menuHandler();
       break;
@@ -335,7 +349,7 @@ bool CustomerManagement::login(){
   cout << "Account Number: "; cin >> customer.accountNumber;
   cin.clear();
   cin.ignore(124, '\n');
-  cout << "Password: "; cin.getline(customer.password,16);
+  cout << "Password: "; passwdInput(customer.password);
 
   ifstream inFile(FILENAME, ios::in);
 

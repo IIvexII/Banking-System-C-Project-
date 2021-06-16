@@ -27,14 +27,26 @@ class TransectionManagement{
     void output(Transection t){
       cout << t.accountNumber << " " << t.state << " " << t.amount << endl;
     }
-    void getTrans(int accountNum){
-      int count=0; 
+    void getTrans(int accountNum, int limit=10){
+      int count=1;
       ifstream inFile(FILENAME);
 
-      while(inFile.read((char*)&transection, sizeof(Transection))&&count<10){
-        output(transection);
-        count++;
+      if(limit==10){
+        while(inFile.read((char*)&transection, sizeof(Transection))){
+          if(transection.accountNumber==accountNum && count<=limit){
+            output(transection);
+            count++;
+          }
+        }
+      }else{
+        while(inFile.read((char*)&transection, sizeof(Transection))){
+          if(transection.accountNumber==accountNum){
+            output(transection);
+          }
+        }
       }
+      
+      inFile.close();
     }
 };
 #undef FILENAME

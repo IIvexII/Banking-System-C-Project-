@@ -18,15 +18,22 @@ class EmployeeManagement{
     char choice;
 
   public:
+    void banner();
     void menu();
     void menuHandler();
     bool login();
 };
+void EmployeeManagement::banner(){
+  system("cls");
+  cout << "*****************************" << endl;
+  cout << "           Empoyee" << endl;
+  cout << "*****************************" << endl;
+}
 /***********************
         menu()
 ***********************/
 void EmployeeManagement::menu(){
-  system("cls");
+  banner();
   cout << "1. New Account" << endl;
   cout << "2. Update Account" << endl;
   cout << "3. Remove Account" << endl;
@@ -115,9 +122,9 @@ bool EmployeeManagement::login(){
   cin.ignore(124, '\n');
 
   cout << "Name: ";cin.getline(name,20) ;
-  cout << "Password: "; cin.getline(password, 20);
+  cout << "Password: "; passwdInput(password);
 
-  if(!strcmp(name,"employee") && !strcmp(password, "bank123")){
+  if(!strcmp(name,"user") && !strcmp(password, "zack123")){
     return 1;
   }
   return 0;
