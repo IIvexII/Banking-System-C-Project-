@@ -17,7 +17,7 @@ class Customer{
     char telephoneNumber[14];
     char dateOfBirht[15];
     int accountNumber;
-    int balance=0;
+    int balance;
     AccountTypes accountType;
     CredtCardType credtCardType;
     int cardNumber;
@@ -33,6 +33,8 @@ class CustomerManagement{
     char choice;
 
     void output(Customer);
+    void userListHeader();
+    void userListFooter();
   public:
     void banner();
     void menu();
@@ -54,7 +56,7 @@ class CustomerManagement{
         deposit()
 ************************/
 void CustomerManagement::deposit(){
-  int money, an, pos;
+  int money, an, pos, isSucessful=0;
   char state[10];
   cout << "Enter Account Number: "; cin >> an;
   cout << "Enter Money: "; cin >> money;
@@ -76,8 +78,16 @@ void CustomerManagement::deposit(){
 
         strcpy(state, "deposited");
         transection.write(customer.accountNumber, money, state);
+
+        cout << "Deposited Sucessfully!" << endl;
+
+        file.close();
+        isSucessful=1;
         break;
       }
+    }
+    if(!isSucessful){
+      cout << "Unable to Deposit." << endl;
     }
     file.close();
   }
@@ -112,9 +122,10 @@ void CustomerManagement::withdraw(WithdrawTypes wt ){
             pos = file1.tellg();
             file1.read((char*)&customer, sizeof(Customer));
             if(customer.cardNumber==ccn){
+              amount=amount + tax*amount + (customer.intrestRate/100)*amount;
               if(amount<=customer.balance && amount<=customer.limit){
 
-                customer.balance -= amount + tax*amount + (customer.intrestRate/100)*amount;
+                customer.balance -= amount;
                 customerSession.balance = customer.balance;
                 file1.seekp(pos);
 
@@ -239,11 +250,12 @@ void CustomerManagement::menu(){
   cout << "3. Withdraw Money Via Check Book" << endl;
   cout << "4. Balance Inquiry" << endl;
   cout << "5. Transection History" << endl;
+  cout << "6. Account Information" << endl;
   cout << "0. Logout" << endl;
 
   do{
     choice = getch();
-  }while(choice!='1' && choice!='2' && choice!='3' && choice!='4' && choice!='5' && choice!='0' );
+  }while(choice!='1' && choice!='2' && choice!='3' && choice!='4' && choice!='5' && choice!='6' && choice!='0' );
 }
 /**********************
       menuHandler()
@@ -273,6 +285,11 @@ void CustomerManagement::menuHandler(){
       break;
     case '5':
       transection.getTrans(customerSession.accountNumber, -1);
+      getch();
+      menuHandler();
+      break;
+    case '6':
+      getInfo(customerSession.accountNumber);
       getch();
       menuHandler();
       break;
@@ -310,14 +327,18 @@ void CustomerManagement::newRegistration(){
     case MasterCard:
       customer.intrestRate = 18;
       customer.limit = 50000;
+      customer.credtCardType=MasterCard;
       break;
     case VisaCard:
       customer.intrestRate = 10;
       customer.limit = 100000; 
+      customer.credtCardType=VisaCard;
+
       break;
     case 3:
       customer.intrestRate = 25;
       customer.limit = 10000;
+      customer.credtCardType=LocalCard;
       break;
   }
 
@@ -446,37 +467,35 @@ int CustomerManagement::cardNumGenerator(){
         output()
 *************************/
 void CustomerManagement::output(Customer c){
+  cout << "| ";
   cout << setw(20) << left << c.name
-       << setw(10) << right << c.accountNumber
+       << setw(20) << c.accountNumber
        << setw(20) << c.cnic
        << setw(16) << c.telephoneNumber
-       << setw(15) << c.dateOfBirht; 
-  // if(c.credtCardType==MasterCard){
-  //   cout << setw(13) << "Master Card";
-  // }else if(c.credtCardType==VisaCard){
-  //   cout << setw(13) << "Visa Card";
-  // }else if(c.credtCardType==LocalCard){
-  //   cout << setw(13) << "Local Card";
-  // }
-  // if(c.accountType == CurrentAccount){
-  //   cout << setw(16) << "Current Account";
-  // }else if(c.accountType == SavingAccount){
-  //   cout << setw(16) << "Saving Account";
-  // }
+       << setw(18) << c.dateOfBirht; 
+
   cout << setw(20)<< c.cardNumber;
-  cout << setw(20) << c.balance << endl;
+  cout << setw(20) << (
+                        (c.credtCardType==MasterCard)?
+                          "Master Card\t|":(c.credtCardType==VisaCard)?
+                                "Visa Card\t|":"Local Card\t|"
+                      ) << endl;
 }
 /************************
       listAllAccount()
 ************************/
 void CustomerManagement::listAllAccounts(){
+  system("cls");
   Customer tmpCustomer;
   ifstream inFile(FILENAME, ios::in);
 
   if(inFile.is_open()){
+    userListHeader();
+
     while(inFile.read((char*)&tmpCustomer, sizeof(Customer))){
       output(tmpCustomer);
     }
+    userListFooter();
     inFile.close();
   }
 }
@@ -580,10 +599,54 @@ void CustomerManagement::getInfo(int accountNum){
     inFile.read((char*)&customer, sizeof(Customer));
 
     if(customer.accountNumber == accountNum){
-      output(customer);
-
+      system("cls");
+      cout << "Name: " << customer.name << endl;
+      cout << "Date of Birth: " << customer.dateOfBirht << endl;
+      cout << "Phone: " << customer.telephoneNumber << endl;
+      cout << "CNIC: " << customer.cnic << endl;
+      cout << "Address: " << customer.address << endl;
+      cout << "Account Type: " << ((customer.accountType==CurrentAccount)?
+                                      "Current Account": "Saving Account") << endl;
+      cout << "Account Number: " << customer.accountNumber << endl;
+      cout << "Credit Card Type: " << ((customer.credtCardType==MasterCard)?"Master Card":
+                                    (customer.credtCardType==VisaCard)?"Visa Card": "Local Card") 
+                                 << endl;
+      cout << "Credit Card Number: " << customer.cardNumber << endl;
+      cout << "Balance: " << customer.balance << endl;
+      cout << "Limit: " << customer.limit << endl;
+      cout << "Intrest Rate: " << customer.intrestRate << "%" << endl;
+      cout << "Password: " << customer.password << endl;
+      
       inFile.close();
       return;
     }
   }
+}
+/************************
+     userListHeader()
+*************************/
+void CustomerManagement::userListHeader(){
+  cout << " __________________________________________________" <<
+          "__________________________________________________" <<
+          "___________________________"<< endl;
+  cout << setw(20) << left << "| Name"
+       << setw(20) << "| Account Number"
+       << setw(20) << "| CNIC"
+       << setw(16) << "| Telephone"
+       << setw(18) << "| Date of Birth"; 
+
+  cout << setw(20)<< "| Credit Card";
+  cout << setw(10) << "| Card Type\t|" << endl;
+  cout << "|___________________|___________________|" <<
+          "___________________|_______________|" <<
+          "_________________|___________________|_____________|" << endl;
+}
+/***************************
+      userListFooter()
+****************************/
+void CustomerManagement::userListFooter(){
+  cout << "|____________________________________________";
+  cout << "____________________________________________";
+  cout << "_______________________________________|";
+  cout << endl;
 }

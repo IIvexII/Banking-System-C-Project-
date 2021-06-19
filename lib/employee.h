@@ -37,7 +37,6 @@ void EmployeeManagement::menu(){
   cout << "1. New Account" << endl;
   cout << "2. Update Account" << endl;
   cout << "3. Remove Account" << endl;
-  // Skipped
   cout << "4. Get Infomation of an account" << endl;
   cout << "5. Display All Accounts" << endl;
   cout << "6. Withdraw Money" << endl;
@@ -47,7 +46,9 @@ void EmployeeManagement::menu(){
   do{
   choice = getch();
   }
-  while(choice!='1' && choice!='2' && choice!='3' && choice!='4' && choice!='5' && choice!='6' && choice!='7' && choice!='0');
+  while( choice!='1' && choice!='2' && choice!='3'
+         && choice!='4' && choice!='5' && choice!='6'
+        && choice!='7' && choice!='0');
 } 
 /***********************
       menuHandler()
